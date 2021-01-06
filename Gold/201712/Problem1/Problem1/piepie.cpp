@@ -82,9 +82,9 @@ int main() {
 		}
 	}
 
-	// Shortest path
-	vector<long long> DP(N * 2, numeric_limits<int>::max());
-	queue<pair<int, long long>> Q;
+	// Dijkstra
+	vector<int> DP(N * 2, numeric_limits<int>::max());
+	priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> Q;
 	for (int i = 0; i < N * 2; i++) {
 		if (i < N) {
 			if (pies[i].second == 0) {
@@ -99,8 +99,8 @@ int main() {
 		}
 	}
 	while (!Q.empty()) {
-		int u = Q.front().first;
-		long long d = Q.front().second;
+		int u = Q.top().first;
+		int d = Q.top().second;
 		Q.pop();
 
 		if (d > DP[u]) continue;
