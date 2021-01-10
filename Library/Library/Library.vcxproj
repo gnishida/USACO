@@ -123,12 +123,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BIT.h" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="TopoSort.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GraphCycleDetection.h" />
+    <ClInclude Include="usaco.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
