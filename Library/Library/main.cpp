@@ -106,11 +106,24 @@ void testSegmentTree() {
 	assert(segTree.query(2, 4) == 2);
 }
 
+void testPrim() {
+	vector<vector<int>> edges = {
+		{0, 4, 13, 7, 7},
+		{4, 0, 9, 3, 7},
+		{13, 9, 0, 10, 14},
+		{7, 3, 10, 0, 4},
+		{7, 7, 14, 4, 0}
+	};
+	assert(prim(5, edges), 20);
+}
+
 int main() {
 	testBinarySearch();
 	testMergeSort();
 	testBIT();
 	testSegmentTree();
+
+	testPrim();
 
 	return 0;
 }

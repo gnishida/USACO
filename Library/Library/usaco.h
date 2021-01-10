@@ -166,6 +166,8 @@ vector<int> dijkstra(int N, vector<vector<pair<int, int>>>& edges, int start) {
 	vector<int> DP(N, numeric_limits<int>::max());
 	DP[start] = 0;
 
+	int done = 0;
+
 	priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> Q;
 	Q.push({ 0, start });
 
@@ -174,6 +176,8 @@ vector<int> dijkstra(int N, vector<vector<pair<int, int>>>& edges, int start) {
 		int u = Q.top().second;
 		Q.pop();
 		if (d > DP[u]) continue;
+
+		done++;
 
 		for (const auto& p : edges[u]) {
 			const auto& v = p.first;
@@ -185,6 +189,9 @@ vector<int> dijkstra(int N, vector<vector<pair<int, int>>>& edges, int start) {
 			}
 		}
 	}
+
+	// done has to be N!
+	if (done < N) throw "There are some unreachable nodes";
 
 	return DP;
 }
@@ -229,18 +236,15 @@ int kruskal_getRoot(vector<int>& parents, int u) {
 	return root;
 }
 
-void kruskal_merge(vector<int>& parents, int& numGroups, int u, int v) {
+void kruskal_merge(vector<int>& parents, int u, int v) {
 	int root_u = kruskal_getRoot(parents, u);
 	int root_v = kruskal_getRoot(parents, v);
 
-	if (root_u != root_v) {
-		parents[root_v] = root_u;
-		numGroups--;
-	}
+	parents[root_v] = root_u;
 }
 
 // edges contain edge <weight, <u, v>>
-vector<pair<int, int>> kruskal(int N, vector<pair<int, pair<int, int>>>& edges) {
+vector<pair<int, int>> kruskal(int N, vector<pair<int, pair<int, int>>>& edges, int exclude_edge) {
 	vector<int> parents(N, -1);
 	int numGroups = N;
 
@@ -259,24 +263,29 @@ vector<pair<int, int>> kruskal(int N, vector<pair<int, pair<int, int>>>& edges) 
 
 		// Use this edge and merge u and v
 		mstEdges.push_back({ u, v });
-		kruskal_merge(parents, numGroups, u, v);
+		kruskal_merge(parents, u, v);
+		numGroups--;
 	}
 
 	// numGroups must be 1!
+	if (numGroups > 1) throw "There are some disconnected nodes";
 
 	return mstEdges;
 }
 
 
-// Prim for MST
-// Use Prim for dense graph!
-// edges contain edge <v, weight>
-vector<int> prim(int N, vector<vector<int>>& edges) {
+/// Prim for MST
+/// Use Prim for dense graph!
+///
+/// \param	N number of nodes
+/// \edges  edges that contain <v, weight>
+/// \return sum of edge lengths in MST
+int prim(int N, vector<vector<int>>& edges) {
 	vector<int> DP(N, numeric_limits<int>::max());
 	DP[0] = 0;
 	vector<int> parents(N, -1);
 	vector<bool> done(N, false);
-	int numDone = 0;
+	int ans = 0;
 
 	priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> Q;
 	Q.push({ 0, 0 });
@@ -286,27 +295,26 @@ vector<int> prim(int N, vector<vector<int>>& edges) {
 		int u = Q.top().second;
 		Q.pop();
 
-		if (done[u]) continue;
-
-		for (int v = 0; v < N; v++) {
-			if (v == u) continue;
-			const auto& w = edges[u][v];
-
-			int new_d = d + w;
-			if (new_d < DP[v]) {
-				DP[v] = new_d;
-				parents[v] = u;
-				Q.push({ new_d, v });
-			}
-		}
+		if (d > DP[u]) continue;
 
 		done[u] = true;
-		numDone++;
+		if (parents[u] >= 0) {
+			ans += edges[parents[u]][u];
+		}
+
+		for (int v = 0; v < N; v++) {
+			if (v == u || done[v]) continue;
+			const auto& w = edges[u][v];
+
+			if (w < DP[v]) {
+				DP[v] = w;
+				parents[v] = u;
+				Q.push({ w, v });
+			}
+		}
 	}
 
-	// numDone must be N!
-
-	return parents;
+	return ans;
 }
 
 
