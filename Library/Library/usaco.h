@@ -9,6 +9,64 @@ using namespace std;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Array related algorithm
+
+// Binary search
+class BinarySearch {
+public:
+	BinarySearch(const vector<int>& A) : N(A.size()), data(A) {}
+
+	int lowerBound(int query) {
+		return lowerBound(0, N - 1, query);
+	}
+
+private:
+	int lowerBound(int left, int right, int query) {
+		if (left >= right) {
+			if (query <= data[left]) return left;
+			else return left + 1;
+		}
+
+		int m = (left + right) / 2;
+		if (query <= data[m]) {
+			return lowerBound(left, m, query);
+		} else {
+			return lowerBound(m + 1, right, query);
+		}
+	}
+
+private:
+	int N;
+	const vector<int>& data;
+};
+
+
+// Merge sort
+vector<int> mergeSort(vector<int>& A, int left, int right) {
+	if (left == right) return { A[left] };
+
+	int m = (left + right) / 2;
+	auto L = mergeSort(A, left, m);
+	auto R = mergeSort(A, m + 1, right);
+
+	vector<int> ret(right - left + 1);
+	int index = 0;
+	int indexL = 0;
+	int indexR = 0;
+
+	while (indexL < L.size() || indexR < R.size()) {
+		if (indexL < L.size() && (indexR >= R.size() || L[indexL] <= R[indexR])) {
+			ret[index++] = L[indexL++];
+		} else {
+			ret[index++] = R[indexR++];
+		}
+	}
+
+	return ret;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Tree related algorithm
 
 // Binary indexed tree for numbers [0, ..., N - 1].
@@ -43,6 +101,7 @@ private:
 	int N;
 	vector<int> data;
 };
+
 
 // Segment tree
 class SegmentTree {
@@ -100,6 +159,157 @@ private:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Graph related algorithm
 
+// Dijkstra for shortest path
+// edgse contain edge <v, weight>
+vector<int> dijkstra(int N, vector<vector<pair<int, int>>>& edges, int start) {
+	// Shortest distance from the start node
+	vector<int> DP(N, numeric_limits<int>::max());
+	DP[start] = 0;
+
+	priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> Q;
+	Q.push({ 0, start });
+
+	while (!Q.empty()) {
+		int d = Q.top().first;
+		int u = Q.top().second;
+		Q.pop();
+		if (d > DP[u]) continue;
+
+		for (const auto& p : edges[u]) {
+			const auto& v = p.first;
+			const auto& w = p.second;
+			int new_d = d + w;
+			if (new_d < DP[v]) {
+				DP[v] = new_d;
+				Q.push({ new_d, v });
+			}
+		}
+	}
+
+	return DP;
+}
+
+
+// Floyd-Warshall for shotest path from all nodes
+// edgse contain edge <v, weight>
+vector<vector<int>> floyd_warshall(int N, vector<vector<pair<int, int>>>& edges) {
+	vector<vector<int>> DP(N, vector<int>(N, numeric_limits<int>::max()));
+
+	// Initialize the distance between nodes
+	for (int u = 0; u < N; u++) {
+		for (const auto& p : edges[u]) {
+			const auto& v = p.first;
+			const auto& w = p.second;
+			DP[u][v] = w;
+		}
+	}
+	for (int u = 0; u < N; u++) {
+		DP[u][u] = 0;
+	}
+
+	for (int k = 0; k < N; k++) {
+		for (int u = 0; u < N; u++) {
+			for (int v = 0; v < N; v++) {
+				DP[u][v] = min(DP[u][v], DP[u][k] + DP[k][v]);
+			}
+		}
+	}
+
+	return DP;
+}
+
+
+// Kruskal for MST
+// Use Kruskal for sparse graph!
+int kruskal_getRoot(vector<int>& parents, int u) {
+	if (parents[u] == -1) return u;
+
+	int root = kruskal_getRoot(parents, parents[u]);
+	parents[u] = root;
+	return root;
+}
+
+void kruskal_merge(vector<int>& parents, int& numGroups, int u, int v) {
+	int root_u = kruskal_getRoot(parents, u);
+	int root_v = kruskal_getRoot(parents, v);
+
+	if (root_u != root_v) {
+		parents[root_v] = root_u;
+		numGroups--;
+	}
+}
+
+// edges contain edge <weight, <u, v>>
+vector<pair<int, int>> kruskal(int N, vector<pair<int, pair<int, int>>>& edges) {
+	vector<int> parents(N, -1);
+	int numGroups = N;
+
+	vector<pair<int, int>> mstEdges;
+
+	sort(edges.begin(), edges.end());
+
+	for (const auto& edge : edges) {
+		const auto& w = edge.first;
+		const auto& u = edge.second.first;
+		const auto& v = edge.second.second;
+
+		int root_u = kruskal_getRoot(parents, u);
+		int root_v = kruskal_getRoot(parents, v);
+		if (root_u == root_v) continue;
+
+		// Use this edge and merge u and v
+		mstEdges.push_back({ u, v });
+		kruskal_merge(parents, numGroups, u, v);
+	}
+
+	// numGroups must be 1!
+
+	return mstEdges;
+}
+
+
+// Prim for MST
+// Use Prim for dense graph!
+// edges contain edge <v, weight>
+vector<int> prim(int N, vector<vector<int>>& edges) {
+	vector<int> DP(N, numeric_limits<int>::max());
+	DP[0] = 0;
+	vector<int> parents(N, -1);
+	vector<bool> done(N, false);
+	int numDone = 0;
+
+	priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> Q;
+	Q.push({ 0, 0 });
+
+	while (!Q.empty()) {
+		int d = Q.top().first;
+		int u = Q.top().second;
+		Q.pop();
+
+		if (done[u]) continue;
+
+		for (int v = 0; v < N; v++) {
+			if (v == u) continue;
+			const auto& w = edges[u][v];
+
+			int new_d = d + w;
+			if (new_d < DP[v]) {
+				DP[v] = new_d;
+				parents[v] = u;
+				Q.push({ new_d, v });
+			}
+		}
+
+		done[u] = true;
+		numDone++;
+	}
+
+	// numDone must be N!
+
+	return parents;
+}
+
+
 // Perform topological sort and return the sorted nodes.
 vector<int> topoSort(int N, vector<vector<int>>& outEdges, vector<int>& numInEdges) {
 	queue<int> Q;
@@ -125,6 +335,7 @@ vector<int> topoSort(int N, vector<vector<int>>& outEdges, vector<int>& numInEdg
 
 	return ans;
 }
+
 
 // Check if the graph has a cycle starting from a node u
 // Note: This is not for checking a cycle for the entire graph.

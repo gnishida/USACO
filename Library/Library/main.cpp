@@ -2,7 +2,33 @@
 
 #include <assert.h>
 
+
 using namespace std;
+
+
+void testBinarySearch() {
+	vector<int> A = { 1, 3, 4, 8, 8, 8, 10 };
+	BinarySearch bs(A);
+	assert(bs.lowerBound(2) == 1); // 1 [3] 4  8  8  8  10
+	assert(bs.lowerBound(3) == 1); // 1 [3] 4  8  8  8  10
+	assert(bs.lowerBound(7) == 3); // 1  3  4 [8] 8  8  10
+	assert(bs.lowerBound(8) == 3); // 1  3  4 [8] 8  8  10
+	assert(bs.lowerBound(9) == 6); // 1  3  4  8  8  8 [10]
+}
+
+void testMergeSort() {
+	vector<int> A = { 3, 8, 4, 1, 5, 7, 2, 6 };
+	auto result = mergeSort(A, 0, A.size() - 1);
+	assert(result.size() == A.size());
+	assert(result[0] == 1);
+	assert(result[1] == 2);
+	assert(result[2] == 3);
+	assert(result[3] == 4);
+	assert(result[4] == 5);
+	assert(result[5] == 6);
+	assert(result[6] == 7);
+	assert(result[7] == 8);
+}
 
 void testBIT() {
 	// array [0, 0, 0, 0, 0]
@@ -81,6 +107,8 @@ void testSegmentTree() {
 }
 
 int main() {
+	testBinarySearch();
+	testMergeSort();
 	testBIT();
 	testSegmentTree();
 
