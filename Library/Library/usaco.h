@@ -208,7 +208,7 @@ vector<int> dijkstra(int N, vector<vector<pair<int, int>>>& edges, int start) {
 // Floyd-Warshall for shotest path from all nodes
 // edgse contain edge <v, weight>
 vector<vector<int>> floyd_warshall(int N, vector<vector<pair<int, int>>>& edges) {
-	vector<vector<int>> DP(N, vector<int>(N, numeric_limits<int>::max()));
+	vector<vector<int>> DP(N, vector<int>(N, -1));
 
 	// Initialize the distance between nodes
 	for (int u = 0; u < N; u++) {
@@ -225,7 +225,10 @@ vector<vector<int>> floyd_warshall(int N, vector<vector<pair<int, int>>>& edges)
 	for (int k = 0; k < N; k++) {
 		for (int u = 0; u < N; u++) {
 			for (int v = 0; v < N; v++) {
-				DP[u][v] = min(DP[u][v], DP[u][k] + DP[k][v]);
+				if (DP[u][k] >= 0 && DP[k][v] >= 0) {
+					if (DP[u][v] == -1) DP[u][v] = DP[u][k] + DP[k][v];
+					else DP[u][v] = min(DP[u][v], DP[u][k] + DP[k][v]);
+				}
 			}
 		}
 	}
