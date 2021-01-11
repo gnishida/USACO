@@ -113,20 +113,28 @@ public:
 
 	// Add the value to the index-th element
 	void add(int query_index, int val) {
-		add(1, 0, N - 1, query_index, val);
+		add(1, 0, N - 1, query_index, query_index, val);
 	}
 
-	void add(int index, int left, int right, int query_index, int val) {
-		data[index] += val;
+	void add(int query_left, int query_right, int val) {
+		add(1, 0, N - 1, query_left, query_right, val);
+	}
 
-		if (left == right) return;
+	void add(int index, int left, int right, int query_left, int query_right, int val) {
+		if (left == right) {
+			data[index] += val;
+			return;
+		}
 
 		int m = (left + right) / 2;
-		if (query_index <= m) {
-			add(index * 2, left, m, query_index, val);
-		} else {
-			add(index * 2 + 1, m + 1, right, query_index, val);
+		if (query_left <= m) {
+			add(index * 2, left, m, query_left, min(m, query_right), val);
 		}
+		if (query_right > m) {
+			add(index * 2 + 1, m + 1, right, max(m + 1, query_left), query_right, val);
+		}
+
+		data[index] = data[index * 2] + data[index * 2 + 1];
 	}
 
 	// Get sum of elements between query_left and query_right
