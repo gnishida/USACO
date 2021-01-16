@@ -66,6 +66,32 @@ vector<int> mergeSort(vector<int>& A, int left, int right) {
 }
 
 
+// Count inversion
+vector<int> mergeSort(vector<int>& A, int left, int right, vector<long long>& inversions) {
+	if (left == right) return { A[left] };
+
+	int m = (left + right) / 2;
+	auto L = mergeSort(A, left, m, inversions);
+	auto R = mergeSort(A, m + 1, right, inversions);
+
+	vector<int> ret(right - left + 1);
+	int index = 0;
+	int indexL = 0;
+	int indexR = 0;
+
+	while (indexL < L.size() || indexR < R.size()) {
+		if (indexL < L.size() && (indexR >= R.size() || L[indexL] <= R[indexR])) {
+			ret[index++] = L[indexL++];
+		} else {
+			inversions[R[indexR]] += L.size() - indexL;
+			ret[index++] = R[indexR++];
+		}
+	}
+
+	return ret;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Tree related algorithm
 
@@ -103,7 +129,7 @@ private:
 };
 
 
-// Segment tree
+// Segment tree for range sum
 class SegmentTree {
 public:
 	SegmentTree(int n) {
@@ -153,6 +179,67 @@ public:
 		}
 		if (query_right > m) {
 			ans += query(index * 2 + 1, m + 1, right, max(m + 1, query_left), query_right);
+		}
+
+		return ans;
+	}
+
+private:
+	int N;
+	vector<int> data;
+};
+
+
+// Segment tree for range min
+class SegmentTreeMin {
+public:
+	SegmentTreeMin(int n) {
+		N = n;
+		data.resize(n * 4, 0);
+	}
+
+	// Add the value to the index-th element
+	void add(int query_index, int val) {
+		add(1, 0, N - 1, query_index, query_index, val);
+	}
+
+	void add(int query_left, int query_right, int val) {
+		add(1, 0, N - 1, query_left, query_right, val);
+	}
+
+	void add(int index, int left, int right, int query_left, int query_right, int val) {
+		if (left == right) {
+			data[index] += val;
+			return;
+		}
+
+		int m = (left + right) / 2;
+		if (query_left <= m) {
+			add(index * 2, left, m, query_left, min(m, query_right), val);
+		}
+		if (query_right > m) {
+			add(index * 2 + 1, m + 1, right, max(m + 1, query_left), query_right, val);
+		}
+
+		data[index] = min(data[index * 2], data[index * 2 + 1]);
+	}
+
+	// Get min between query_left and query_right
+	int query(int query_left, int query_right) {
+		return query(1, 0, N - 1, query_left, query_right);
+	}
+
+	int query(int index, int left, int right, int query_left, int query_right) {
+		if (left == query_left && right == query_right) return data[index];
+
+		int ans = numeric_limits<int>::max();
+
+		int m = (left + right) / 2;
+		if (query_left <= m) {
+			ans = min(ans, query(index * 2, left, m, query_left, min(m, query_right)));
+		}
+		if (query_right > m) {
+			ans = min(ans, query(index * 2 + 1, m + 1, right, max(m + 1, query_left), query_right));
 		}
 
 		return ans;
@@ -239,17 +326,19 @@ vector<vector<int>> floyd_warshall(int N, vector<vector<pair<int, int>>>& edges)
 
 // Kruskal for MST
 // Use Kruskal for sparse graph!
-int kruskal_getRoot(vector<int>& parents, int u) {
+int getRoot(vector<int>& parents, int u) {
 	if (parents[u] == -1) return u;
 
-	int root = kruskal_getRoot(parents, parents[u]);
+	int root = getRoot(parents, parents[u]);
 	parents[u] = root;
 	return root;
 }
 
-void kruskal_merge(vector<int>& parents, int u, int v) {
-	int root_u = kruskal_getRoot(parents, u);
-	int root_v = kruskal_getRoot(parents, v);
+void unionSet(vector<int>& parents, int u, int v) {
+	int root_u = getRoot(parents, u);
+	int root_v = getRoot(parents, v);
+
+	if (root_v == root_u) return;
 
 	parents[root_v] = root_u;
 }
@@ -268,13 +357,14 @@ vector<pair<int, int>> kruskal(int N, vector<pair<int, pair<int, int>>>& edges, 
 		const auto& u = edge.second.first;
 		const auto& v = edge.second.second;
 
-		int root_u = kruskal_getRoot(parents, u);
-		int root_v = kruskal_getRoot(parents, v);
+		int root_u = getRoot(parents, u);
+		int root_v = getRoot(parents, v);
 		if (root_u == root_v) continue;
 
 		// Use this edge and merge u and v
 		mstEdges.push_back({ u, v });
-		kruskal_merge(parents, u, v);
+		unionSet(parents, u, v);
+
 		numGroups--;
 	}
 
