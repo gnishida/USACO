@@ -44,7 +44,7 @@ int main() {
 			long long x = primes[j];
 			while (i - x >= 0) {
 				DP[i][j] = (DP[i][j] + DP[i - x][j - 1] * x) % M;
-				x = (x * primes[j]) % M;
+				x = x * primes[j];
 			}
 		}
 	}
