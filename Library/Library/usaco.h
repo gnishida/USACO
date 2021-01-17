@@ -11,6 +11,25 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Array related algorithm
 
+// Find prim numbers up to N
+vector<int> findPrimes(int N) {
+	vector<int> primes;
+	vector<bool> isPrime(N + 1, true);
+
+	primes.push_back(1);
+	for (int x = 2; x <= N; x++) {
+		if (!isPrime[x]) continue;
+
+		primes.push_back(x);
+		for (int y = x * 2; y <= N; y += x) {
+			isPrime[y] = false;
+		}
+	}
+
+	return primes;
+}
+
+
 // Binary search
 class BinarySearch {
 public:
