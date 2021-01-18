@@ -114,6 +114,64 @@ vector<int> mergeSort(vector<int>& A, int left, int right, vector<long long>& in
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Tree related algorithm
 
+struct TreeNode {
+    int depth;
+    int preorder_index;
+    int left;
+    int right;
+};
+
+
+// DFS to get preorder index and range of the child indices
+void dfs_preorder(const vector<vector<int>>& edges, int u, int parent, int depth, int& preorder_index, vector<TreeNode>& nodes) {
+    nodes[u].depth = depth;
+    nodes[u].left = preorder_index;
+    nodes[u].preorder_index = preorder_index++;
+
+    for (const auto& v : edges[u]) {
+        if (v == parent) continue;
+        dfs_preorder(edges, v, u, depth + 1, preorder_index, nodes);
+    }
+
+    nodes[u].right = preorder_index - 1;
+}
+
+
+// Get lowest common ancestor
+int getLCA(const vector<TreeNode>& nodes, const vector<int>& ancestors, int u, int other) {
+    if (nodes[other].preorder_index >= nodes[u].left && nodes[other].preorder_index <= nodes[u].right) return u;
+
+    int depth = nodes[u].depth;
+    int step = depth / 2;
+
+    while (step > 0) {
+        if (nodes[other].preorder_index < nodes[u].left || nodes[other].preorder_index > nodes[u].right) {
+            depth -= step;
+        } else {
+            if (step == 1) break;
+            depth += step;
+        }
+        u = ancestors[depth];
+        step /= 2;
+    }
+
+    // Go up for final adjustment
+    while (nodes[other].preorder_index < nodes[u].left || nodes[other].preorder_index > nodes[u].right) {
+        u = ancestors[--depth];
+    }
+
+    // Go down for final adjustment
+    while (true) {
+        int next = ancestors[depth + 1];
+        if (nodes[other].preorder_index < nodes[next].left || nodes[other].preorder_index > nodes[next].right) break;
+        u = next;
+        depth++;
+    }
+
+    return u;
+}
+
+
 // Binary indexed tree for numbers [0, ..., N - 1].
 class BIT {
 public:
