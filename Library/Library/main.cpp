@@ -114,7 +114,41 @@ void testPrim() {
 		{7, 3, 10, 0, 4},
 		{7, 7, 14, 4, 0}
 	};
-	assert(prim(5, edges), 20);
+	assert(prim(5, edges) == 20);
+}
+
+void testBiconnectedComponents() {
+	
+	vector<vector<int>> edges = {
+		{2, 3},
+		{2, 4},
+		{0, 1, 3},
+		{0, 2},
+		{1, 5, 7},
+		{4, 6},
+		{5, 7, 8},
+		{4, 6, 8},
+		{6, 7}
+	};
+	/*
+	vector<vector<int>> edges = {
+		{1, 4},
+		{0, 2, 3},
+		{1, 3},
+		{1, 2},
+		{0, 5, 7},
+		{4, 6},
+		{5, 7, 8},
+		{4, 6, 8},
+		{6, 7}
+	};
+	*/
+	vector<int> groups = biconnectedComponents(9, edges, 0);
+
+	vector<int> expected = { 2, 1, 2, 2, 0, 0, 0, 0, 0 };
+	for (int i = 0; i < groups.size(); i++) {
+		assert(groups[i] == expected[i]);
+	}
 }
 
 int main() {
@@ -124,6 +158,8 @@ int main() {
 	testSegmentTree();
 
 	testPrim();
+
+	testBiconnectedComponents();
 
 	return 0;
 }

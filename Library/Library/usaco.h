@@ -3,7 +3,8 @@
 #include <vector>
 #include <queue>
 #include <unordered_set>
-
+#include <stack>
+#include <iostream>
 
 using namespace std;
 
@@ -535,5 +536,68 @@ bool hasCycle(const vector<vector<int>>& edges, int u, unordered_set<int>& path)
 	path.erase(u);
 
 	return false;
+}
+
+// Bi-connected components
+struct BCCNode {
+	int parent;
+	int depth;
+	int low;
+	bool visited;
+
+	BCCNode() {
+		parent = -1;
+		depth = -1;
+		int low = -1;
+		visited = false;
+	}
+};
+
+void biconnectedComponents(int N, const vector<vector<int>>& edges, int u, int depth, vector<BCCNode>& nodes, vector<int>& components, int& groupId, vector<int>& groups) {
+	nodes[u].visited = true;
+	nodes[u].depth = depth;
+	nodes[u].low = depth;
+
+	int childCount = 0;
+	bool isArticulation = false;
+
+	for (const auto& v : edges[u]) {
+		if (!nodes[v].visited) {
+			nodes[v].parent = u;
+			biconnectedComponents(N, edges, v, depth + 1, nodes, components, groupId, groups);
+			childCount++;
+			if (nodes[v].low >= nodes[u].depth) isArticulation = true;
+			nodes[u].low = min(nodes[u].low, nodes[v].low);
+		} else if (v != nodes[u].parent) {
+			nodes[u].low = min(nodes[u].low, nodes[v].depth);
+		}
+	}
+
+	components.push_back(u);
+
+	if ((nodes[u].parent >= 0 && isArticulation) || (nodes[u].parent == -1 && childCount >= 2)) {
+		for (const auto& c : components) {
+			groups[c] = groupId;
+		}
+		components.clear();
+		groupId++;
+	}
+}
+
+vector<int> biconnectedComponents(int N, const vector<vector<int>>& edges, int start) {
+	vector<BCCNode> nodes(N);
+	vector<int> components;
+	vector<int> groups(N, -1);
+	int groupId = 0;
+	biconnectedComponents(N, edges, start, 0, nodes, components, groupId, groups);
+
+	// Add the last component to the previous group
+	groupId--;
+	for (const auto& c : components) {
+		groups[c] = groupId;
+	}
+	components.clear();
+
+	return groups;
 }
 
