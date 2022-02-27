@@ -11,7 +11,7 @@ Segment treeのノードには、2つの情報を入れる。heightをブロッ�
 2. 探したheightのブロック数を無限に変更し、segment treeを更新する。
 3. 探したheightから+-Kのheightについて、ブロック数を1減らす。
 4. 1に戻る。
-<img src="images/traverse_segment_tree.png" width="400" />
+<img src="images/traverse_segment_tree.png" width="600" />
 
 
 
