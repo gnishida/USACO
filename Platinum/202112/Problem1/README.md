@@ -2,7 +2,7 @@
 1. checkpointとticketを共に１つのgraphで表現する。下図で、丸はcheckpoint、四角はticketを表す。エッジのコストは、ticket購入価格。
 2. 作成したgraphに対して、Dijkstraアルゴリズムでcheckpoint iからcheckpoint 1までの距離 D_1[i]を計算する。
 3. 同様にして、checkpoint iから checkpoitn Nまでの距離 D_N[i]を計算する。
-![image](images/graph.png | width=200)
+<img src="images/graph.png" width="200" />
 
 
 しかし、D_1[i] + D_N[i]では、一部区間のコストが重複して含まれているため、求めたい最短距離ではない。
