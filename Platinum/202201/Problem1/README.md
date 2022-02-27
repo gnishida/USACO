@@ -5,7 +5,7 @@
 <img src="images/basic_idea.png" width="240" />
 
 しかし、これでは、O(N^2)となり、遅い。そこで、segment tree用意し、heightをソートして入れておく。
-Segment treeのノードには、2つの情報を入れる。heightをブロックしているheightの数の最小値、そして、heightの最小値。
+Segment treeのノードには、2つの情報を入れる。heightをブロックしているheightの数の最小値 (min #blocks)、そして、heightの最小値。
 
 1. Sement treeを使って、ブロック数が0の最小heightを探す。
 2. 探したheightのブロック数を無限に変更し、segment treeを更新する。
