@@ -1,4 +1,5 @@
 #include "usaco.h"
+#include "treap.h"
 
 #include <assert.h>
 
@@ -151,6 +152,25 @@ void testBiconnectedComponents() {
 	}
 }
 
+void testTreap() {
+	struct TreapNode* root = nullptr;
+	root = TreapInsert(root, 50);
+	root = TreapInsert(root, 30);
+	root = TreapInsert(root, 20);
+	root = TreapInsert(root, 40);
+	root = TreapInsert(root, 70);
+	root = TreapInsert(root, 60);
+	root = TreapInsert(root, 80);
+
+	root = TreapDeleteNode(root, 20);
+
+	TreapNode* result = TreapSearch(root, 50);
+	assert(result);
+	assert(result->key == 50);
+
+	assert(TreapSearch(root, 20) == nullptr);
+}
+
 int main() {
 	testBinarySearch();
 	testMergeSort();
@@ -160,6 +180,8 @@ int main() {
 	testPrim();
 
 	testBiconnectedComponents();
+
+	testTreap();
 
 	return 0;
 }
